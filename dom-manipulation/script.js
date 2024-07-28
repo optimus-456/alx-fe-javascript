@@ -147,13 +147,22 @@ async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_URL);
     const serverQuotes = await response.json();
+    return serverQuotes;
+  } catch (error) {
+    console.error("Error fetching quotes from server:", error);
+    return [];
+  }
+}
+
+// Function to sync quotes with the server
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
+  if (serverQuotes.length > 0) {
     const mergedQuotes = mergeQuotes(serverQuotes);
     quotes = mergedQuotes;
     saveQuotes();
     updateCategoryFilter();
-    showNotification("Quotes fetched from server and merged successfully.");
-  } catch (error) {
-    console.error("Error fetching quotes from server:", error);
+    showNotification("Quotes synchronized with server.");
   }
 }
 
@@ -170,7 +179,7 @@ async function syncWithServer(newQuote = null) {
       });
     }
 
-    await fetchQuotesFromServer();
+    await syncQuotes();
   } catch (error) {
     console.error("Error syncing with server:", error);
   }
@@ -235,5 +244,5 @@ if (lastViewedQuote) {
   quoteDisplay.innerHTML = `"${quote.text}" - ${quote.category}`;
 }
 
-// Periodically fetch quotes from the server
-setInterval(fetchQuotesFromServer, 30000); // Fetch every 30 seconds
+// Periodically fetch quotes from the server and sync with local storage
+setInterval(syncQuotes, 30000); // Sync every 30 seconds
