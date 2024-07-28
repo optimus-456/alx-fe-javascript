@@ -25,6 +25,11 @@
         padding: 10px;
         font-size: 1em;
       }
+      #notification {
+        color: red;
+        font-size: 1em;
+        margin-top: 20px;
+      }
     </style>
   </head>
   <body>
@@ -39,10 +44,11 @@
       accept=".json"
       onchange="importFromJsonFile(event)"
     />
+    <br /><br />
     <select id="categoryFilter" onchange="filterQuotes()">
       <option value="all">All Categories</option>
-      <!-- Dynamically populated categories -->
     </select>
+    <div id="notification"></div>
     <script src="script.js"></script>
   </body>
 </html>
