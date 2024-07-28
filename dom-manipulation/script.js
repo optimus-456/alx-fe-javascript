@@ -199,7 +199,7 @@ function mergeQuotes(serverQuotes) {
 // Function to show notifications
 function showNotification(message) {
   const notification = document.getElementById("notification");
-  notification.textContent = message;
+  notification.textContent = "Quotes synced with server!";
   notification.style.display = "block";
   setTimeout(() => {
     notification.style.display = "none";
