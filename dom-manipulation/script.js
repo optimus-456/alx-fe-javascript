@@ -1,19 +1,15 @@
-// Array of quote objects
-let quotes = [
-  {
-    text: "The only limit to our realization of tomorrow is our doubts of today.",
-    category: "Motivation",
-  },
-  {
-    text: "Life is what happens when you're busy making other plans.",
-    category: "Life",
-  },
-  { text: "Get busy living or get busy dying.", category: "Life" },
-  {
-    text: "The way to get started is to quit talking and begin doing.",
-    category: "Motivation",
-  },
-];
+// Function to load quotes from local storage
+function loadQuotes() {
+  const savedQuotes = localStorage.getItem("quotes");
+  if (savedQuotes) {
+    quotes = JSON.parse(savedQuotes);
+  }
+}
+
+// Function to save quotes to local storage
+function saveQuotes() {
+  localStorage.setItem("quotes", JSON.stringify(quotes));
+}
 
 // Function to display a random quote
 function showRandomQuote() {
@@ -21,6 +17,7 @@ function showRandomQuote() {
   const randomIndex = Math.floor(Math.random() * quotes.length);
   const randomQuote = quotes[randomIndex];
   quoteDisplay.innerHTML = `"${randomQuote.text}" - ${randomQuote.category}`;
+  sessionStorage.setItem("lastViewedQuote", JSON.stringify(randomQuote));
 }
 
 // Function to add a new quote
@@ -30,6 +27,7 @@ function addNewQuote() {
 
   if (quoteText && quoteCategory) {
     quotes.push({ text: quoteText, category: quoteCategory });
+    saveQuotes();
     document.getElementById("quoteText").value = "";
     document.getElementById("quoteCategory").value = "";
     alert("Quote added successfully!");
@@ -69,9 +67,68 @@ function createAddQuoteForm() {
   addQuoteButton.addEventListener("click", addNewQuote);
 }
 
-// Event listeners for buttons
-document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+// Function to export quotes to a JSON file
+function exportQuotesToJson() {
+  const dataStr = JSON.stringify(quotes, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "quotes.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Function to import quotes from a JSON file
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function (event) {
+    const importedQuotes = JSON.parse(event.target.result);
+    quotes.push(...importedQuotes);
+    saveQuotes();
+    alert("Quotes imported successfully!");
+    showRandomQuote();
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
 
 // Initial setup
+let quotes = [
+  {
+    text: "The only limit to our realization of tomorrow is our doubts of today.",
+    category: "Motivation",
+  },
+  {
+    text: "Life is what happens when you're busy making other plans.",
+    category: "Life",
+  },
+  { text: "Get busy living or get busy dying.", category: "Life" },
+  {
+    text: "The way to get started is to quit talking and begin doing.",
+    category: "Motivation",
+  },
+];
+
+// Load quotes from local storage if available
+loadQuotes();
+
+// Event listeners for buttons
+document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+document
+  .getElementById("exportQuotes")
+  .addEventListener("click", exportQuotesToJson);
+
+// Initial display of a random quote
 showRandomQuote();
 createAddQuoteForm();
+
+// Load the last viewed quote from session storage if available
+const lastViewedQuote = sessionStorage.getItem("lastViewedQuote");
+if (lastViewedQuote) {
+  const quoteDisplay = document.getElementById("quoteDisplay");
+  const quote = JSON.parse(lastViewedQuote);
+  quoteDisplay.innerHTML = `"${quote.text}" - ${quote.category}`;
+}
