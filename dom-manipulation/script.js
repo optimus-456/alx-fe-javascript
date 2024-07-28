@@ -142,6 +142,21 @@ function getFilteredQuotes() {
   return quotes.filter((quote) => quote.category === selectedCategory);
 }
 
+// Function to fetch quotes from the server
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const serverQuotes = await response.json();
+    const mergedQuotes = mergeQuotes(serverQuotes);
+    quotes = mergedQuotes;
+    saveQuotes();
+    updateCategoryFilter();
+    showNotification("Quotes fetched from server and merged successfully.");
+  } catch (error) {
+    console.error("Error fetching quotes from server:", error);
+  }
+}
+
 // Function to sync local data with the server
 async function syncWithServer(newQuote = null) {
   try {
@@ -155,13 +170,7 @@ async function syncWithServer(newQuote = null) {
       });
     }
 
-    const response = await fetch(SERVER_URL);
-    const serverQuotes = await response.json();
-    const mergedQuotes = mergeQuotes(serverQuotes);
-    quotes = mergedQuotes;
-    saveQuotes();
-    updateCategoryFilter();
-    showNotification("Quotes synchronized with server.");
+    await fetchQuotesFromServer();
   } catch (error) {
     console.error("Error syncing with server:", error);
   }
@@ -207,4 +216,24 @@ let quotes = [
 // Load quotes from local storage if available
 loadQuotes();
 
-//
+// Event listeners for buttons
+document.getElementById("newQuote").addEventListener("click", showRandomQuote);
+document
+  .getElementById("exportQuotes")
+  .addEventListener("click", exportQuotesToJson);
+
+// Initial display of a random quote
+showRandomQuote();
+createAddQuoteForm();
+updateCategoryFilter();
+
+// Load the last viewed quote from session storage if available
+const lastViewedQuote = sessionStorage.getItem("lastViewedQuote");
+if (lastViewedQuote) {
+  const quoteDisplay = document.getElementById("quoteDisplay");
+  const quote = JSON.parse(lastViewedQuote);
+  quoteDisplay.innerHTML = `"${quote.text}" - ${quote.category}`;
+}
+
+// Periodically fetch quotes from the server
+setInterval(fetchQuotesFromServer, 30000); // Fetch every 30 seconds
