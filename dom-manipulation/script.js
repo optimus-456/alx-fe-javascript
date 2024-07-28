@@ -200,8 +200,9 @@ function mergeQuotes(serverQuotes) {
 function showNotification(message) {
   const notification = document.getElementById("notification");
   notification.textContent = message;
+  notification.style.display = "block";
   setTimeout(() => {
-    notification.textContent = "";
+    notification.style.display = "none";
   }, 3000);
 }
 
@@ -246,3 +247,4 @@ if (lastViewedQuote) {
 
 // Periodically fetch quotes from the server and sync with local storage
 setInterval(syncQuotes, 30000); // Sync every 30 seconds
+``;
